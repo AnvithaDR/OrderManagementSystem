@@ -46,13 +46,24 @@ app.get("/api/health", (req, res) =>
   })
 );
 
-// Get active products
+// Get active products with stock
 app.get("/api/products", async (req, res) => {
   const sql = `
-    SELECT id, product_code, name, description, price, status, created_at
-    FROM products
-    WHERE status = 'ACTIVE'
+    SELECT
+      p.id,
+      p.product_code,
+      p.name,
+      p.description,
+      p.price,
+      p.status,
+      p.created_at,
+      IFNULL(i.quantity, 0) AS quantity
+    FROM products p
+    LEFT JOIN inventory i
+      ON p.id = i.product_id
+    WHERE p.status = 'ACTIVE'
   `;
+
   try {
     const [rows] = await pool.query(sql);
     res.json(rows);
@@ -61,6 +72,7 @@ app.get("/api/products", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });
+
 
 // Create product
 app.post("/api/products", async (req, res) => {
@@ -96,6 +108,27 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
+// Get all orders
+app.get("/api/orders", async (req, res) => {
+  const sql = `
+    SELECT
+      o.id,
+      o.customer_id,
+      o.total_amount,
+      o.status,
+      o.created_at
+    FROM orders o
+    ORDER BY o.created_at DESC
+  `;
+
+  try {
+    const [rows] = await pool.query(sql);
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching orders:", err?.message ?? err);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
 
 // GET /api/orders/:id  -> return order with items and customer
 app.get("/api/orders/:id", async (req, res) => {
