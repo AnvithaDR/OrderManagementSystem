@@ -1,0 +1,176 @@
+{
+	"info": {
+		"_postman_id": "4159bb2c-248d-4abf-a121-7ac44bd5c4dc",
+		"name": "OMS API Testing",
+		"description": "Order Management System API tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50585184",
+		"_collection_link": "https://anvithasonu1996-737272.postman.co/workspace/Anvitha's-Workspace~d39eb3d8-56ab-4fa1-825c-906079b19838/collection/50585184-4159bb2c-248d-4abf-a121-7ac44bd5c4dc?action=share&source=collection_link&creator=50585184"
+	},
+	"item": [
+		{
+			"name": "GET Health API",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Products API",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Products list is not empty\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData.length).to.be.above(0);\r",
+							"});\r",
+							"pm.test(\"All products are ACTIVE\", function () {\r",
+							"    const products = pm.response.json();\r",
+							"\r",
+							"    products.forEach(product => {\r",
+							"        pm.expect(product.status).to.eql(\"ACTIVE\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Create Order sucess",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Order ID is generated\", function () {\r",
+							"    const res = pm.response.json();\r",
+							"    pm.expect(res.order.id).to.be.a(\"number\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Order status is NEW\", function () {\r",
+							"    const res = pm.response.json();\r",
+							"    pm.expect(res.order.status).to.eql(\"NEW\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"customer_id\" : 1,\r\n\"items\" : [\r\n    {\r\n    \"product_id\" : 1,\r\n    \"quantity\" : 1\r\n    }\r\n]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/orders",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Create Order – Insufficient Stock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 for insufficient stock\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Error message mentions insufficient stock\", function () {\r",
+							"    const res = pm.response.json();\r",
+							"    pm.expect(res.error.toLowerCase()).to.include(\"insufficient\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"customer_id\" : 1,\r\n\"items\" : [\r\n    {\r\n    \"product_id\" : 1,\r\n    \"quantity\" : 100\r\n    }\r\n]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/orders",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
